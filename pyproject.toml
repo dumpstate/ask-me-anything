@@ -1,0 +1,14 @@
+[project]
+name = "ama"
+description = "bring context and ask any question"
+version = "0.1.0"
+authors = [
+    { name = "Albert Sadowski", email = "asadowski@mailbox.org" }
+]
+dependencies = [
+    "alembic",
+    "fastapi",
+    "psycopg2",
+    "sqlalchemy",
+    "uvicorn"
+]
