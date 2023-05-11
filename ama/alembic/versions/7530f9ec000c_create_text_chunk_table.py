@@ -6,7 +6,8 @@ Create Date: 2023-05-11 23:01:44.393666
 
 """
 from alembic import op
-import sqlalchemy as sa
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Column, Integer, String
 
 
 # revision identifiers, used by Alembic.
@@ -17,10 +18,12 @@ depends_on = None
 
 
 def upgrade() -> None:
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
     op.create_table(
         "text_chunk",
-        sa.Column("id", sa.Integer, primary_key=True, index=True),
-        sa.Column("text", sa.String)
+        Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("text", String),
+        Column("embedding", Vector(1536))
     )
 
 

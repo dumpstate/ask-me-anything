@@ -8,6 +8,7 @@ authors = [
 dependencies = [
     "alembic",
     "fastapi",
+    "pgvector",
     "psycopg2",
     "sqlalchemy",
     "uvicorn"
