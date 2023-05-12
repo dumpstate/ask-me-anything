@@ -46,7 +46,7 @@ def iter_chunks(text: str):
             break
 
         lb = max(0, offset - CHUNK_OVERLAP)
-        ub = max(len(text), offset + CHUNK_SIZE + CHUNK_OVERLAP)
+        ub = min(len(text), offset + CHUNK_SIZE + CHUNK_OVERLAP)
         yield text[lb:ub]
 
         offset += CHUNK_SIZE
@@ -73,11 +73,11 @@ def add_url_to_context(url: URL, db: Session = Depends(get_db)):
     html = urlopen(url.url).read()
     text = get_text(html)
 
-    for chunk in iter_chunks(text):
-        embedding = get_embedding(chunk)
-        create_text_chunk(db, chunk, embedding)
+    with db.begin():
+        for chunk in iter_chunks(text):
+            embedding = get_embedding(chunk)
+            create_text_chunk(db, chunk, embedding)
 
     db.commit()
 
-    # TODO for each chunk, compute and persist embeddings
     return Status(success=True)
