@@ -12,17 +12,5 @@ services:
             POSTGRES_PASSWORD: ama_pass
             POSTGRES_DB: ama_db
 
-    minio:
-        image: minio/minio
-        ports:
-            - "9000:9000"
-        volumes:
-            - "minio-data:/data"
-        environment:
-            MINIO_ROOT_USER: ama
-            MINIO_ROOT_PASSWORD: ama_pass
-        command: server /data
-
 volumes:
     postgres-data:
-    minio-data:

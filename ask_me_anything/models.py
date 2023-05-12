@@ -2,7 +2,7 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import mapped_column
 
-from ama.db import Base
+from ask_me_anything.db import Base
 
 
 class TextChunk(Base):

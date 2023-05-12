@@ -1,7 +1,7 @@
 .PHONY: migrate, run
 
 run:
-	uvicorn ama.main:app --reload
+	uvicorn ask_me_anything.main:app --reload
 
 migrate:
 	alembic upgrade head

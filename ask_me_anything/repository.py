@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from ama.models import TextChunk
+from ask_me_anything.models import TextChunk
 
 
 def create_text_chunk(db: Session, text: str, embedding: list[float]) -> TextChunk:

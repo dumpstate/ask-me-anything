@@ -1,5 +1,5 @@
 [project]
-name = "ama"
+name = "ask-me-anything"
 description = "bring context and ask any question"
 version = "0.1.0"
 authors = [

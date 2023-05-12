@@ -6,10 +6,10 @@ from bs4 import BeautifulSoup
 from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
 
-from ama.db import SessionLocal
-from ama.models import TextChunk
-from ama.repository import create_text_chunk, find_neighbours, get_text_chunks
-from ama.schemas import Answer, Question, Status, TextChunk, URL
+from ask_me_anything.db import SessionLocal
+from ask_me_anything.models import TextChunk
+from ask_me_anything.repository import create_text_chunk, find_neighbours, get_text_chunks
+from ask_me_anything.schemas import Answer, Question, Status, TextChunk, URL
 
 
 CHUNK_SIZE = 1000
