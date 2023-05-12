@@ -2,3 +2,5 @@ ama.egg-info/
 venv/
 
 __pycache__
+
+.env

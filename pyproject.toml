@@ -9,6 +9,7 @@ dependencies = [
     "alembic",
     "beautifulsoup4",
     "fastapi",
+    "openai[embeddings]",
     "pgvector",
     "psycopg2",
     "sqlalchemy",
