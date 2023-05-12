@@ -12,3 +12,11 @@ class Status(BaseModel):
 class TextChunk(BaseModel):
     id: int
     text: str
+
+
+class Question(BaseModel):
+    question: str
+
+
+class Answer(BaseModel):
+    answer: str

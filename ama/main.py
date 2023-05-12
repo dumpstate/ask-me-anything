@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from ama.db import SessionLocal
 from ama.models import TextChunk
-from ama.repository import create_text_chunk, get_text_chunks
-from ama.schemas import Status, TextChunk, URL
+from ama.repository import create_text_chunk, find_neighbours, get_text_chunks
+from ama.schemas import Answer, Question, Status, TextChunk, URL
 
 
 CHUNK_SIZE = 1000
@@ -81,3 +81,32 @@ def add_url_to_context(url: URL, db: Session = Depends(get_db)):
     db.commit()
 
     return Status(success=True)
+
+
+@app.post("/api/v1/question", response_model=Answer)
+def ask_a_question(question: Question, db: Session = Depends(get_db)):
+    embedding = get_embedding(question.question)
+    ns = find_neighbours(db, embedding, 1)
+    context = "\n".join(n.text for n in ns)
+
+    print(context)
+
+    # TODO better prompt
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": f"""
+You're a helpful assistant.
+
+Given the context provided in ``` quotes:
+
+```
+{context}
+```
+
+{question.question}
+            """}
+        ],
+    )
+
+    return Answer(answer=completion.choices[0].message.content)
