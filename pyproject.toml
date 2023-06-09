@@ -7,8 +7,8 @@ authors = [
 ]
 dependencies = [
     "alembic",
-    "beautifulsoup4",
     "fastapi",
+    "langchain",
     "openai[embeddings]",
     "pgvector",
     "psycopg2",

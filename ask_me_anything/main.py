@@ -1,23 +1,39 @@
-import os
-from urllib.request import urlopen
-
 import openai
-from bs4 import BeautifulSoup
 from fastapi import Depends, FastAPI
+from langchain.chains import LLMChain
+from langchain.document_loaders import WebBaseLoader
+from langchain.llms import OpenAI
+from langchain.prompts import PromptTemplate
 from sqlalchemy.orm import Session
 
+from ask_me_anything.config import Config
 from ask_me_anything.db import SessionLocal
 from ask_me_anything.models import TextChunk
 from ask_me_anything.repository import create_text_chunk, find_neighbours, get_text_chunks
 from ask_me_anything.schemas import Answer, Question, Status, TextChunk, URL
 
 
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
 
 app = FastAPI()
+config = Config.load()
+llm = OpenAI(openai_api_key=config.openai_api_key)
+question_prompt = PromptTemplate(
+    input_variables=["question", "context"],
+    template="""
+        You're a helpful assistant.
+
+        Given the context provided in ``` quotes:
+
+        ```
+        {context}
+        ```
+
+        {question}
+    """.strip(),
+)
+question_chain = LLMChain(llm=llm, prompt=question_prompt)
 
 
 def get_db():
@@ -26,30 +42,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-def get_text(html):
-    soup = BeautifulSoup(html, features="html.parser")
-
-    for script in soup(["script", "stype"]):
-        script.extract()
-
-    text = soup.body.get_text()
-    return "\n".join(line.strip() for line in text.splitlines() if line.strip())
-
-
-def iter_chunks(text: str):
-    offset = 0
-
-    while True:
-        if offset >= len(text):
-            break
-
-        lb = max(0, offset - CHUNK_OVERLAP)
-        ub = min(len(text), offset + CHUNK_SIZE + CHUNK_OVERLAP)
-        yield text[lb:ub]
-
-        offset += CHUNK_SIZE
 
 
 def get_embedding(text: str):
@@ -70,13 +62,13 @@ def search_text_chunks(offset: int = 0, limit: int = 10, db: Session = Depends(g
 
 @app.put("/api/v1/context", response_model=Status)
 def add_url_to_context(url: URL, db: Session = Depends(get_db)):
-    html = urlopen(url.url).read()
-    text = get_text(html)
+    loader = WebBaseLoader(url.url)
+    documents = loader.load_and_split()
 
     with db.begin():
-        for chunk in iter_chunks(text):
-            embedding = get_embedding(chunk)
-            create_text_chunk(db, chunk, embedding)
+        for document in documents:
+            embedding = get_embedding(document.page_content)
+            create_text_chunk(db, document.page_content, embedding)
 
     db.commit()
 
@@ -91,22 +83,9 @@ def ask_a_question(question: Question, db: Session = Depends(get_db)):
 
     print(context)
 
-    # TODO better prompt
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": f"""
-You're a helpful assistant.
-
-Given the context provided in ``` quotes:
-
-```
-{context}
-```
-
-{question.question}
-            """}
-        ],
+    answer = question_chain.run(
+        question=question.question,
+        context=context,
     )
 
-    return Answer(answer=completion.choices[0].message.content)
+    return Answer(answer=answer)
