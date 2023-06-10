@@ -7,7 +7,9 @@ authors = [
 ]
 dependencies = [
     "alembic",
+    "bs4",
     "fastapi",
+    "jinja2",
     "langchain",
     "openai[embeddings]",
     "pgvector",

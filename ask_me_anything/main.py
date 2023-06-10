@@ -1,5 +1,6 @@
 import openai
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
+from fastapi.templating import Jinja2Templates
 from langchain.chains import LLMChain
 from langchain.document_loaders import WebBaseLoader
 from langchain.llms import OpenAI
@@ -18,6 +19,7 @@ OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
 app = FastAPI()
 config = Config.load()
+templates = Jinja2Templates(directory="ask_me_anything/templates")
 llm = OpenAI(openai_api_key=config.openai_api_key)
 question_prompt = PromptTemplate(
     input_variables=["question", "context"],
@@ -89,3 +91,8 @@ def ask_a_question(question: Question, db: Session = Depends(get_db)):
     )
 
     return Answer(answer=answer)
+
+
+@app.get("/")
+def ask_anything(request: Request):
+    return templates.TemplateResponse("ask_anything.html", {"request": request})
