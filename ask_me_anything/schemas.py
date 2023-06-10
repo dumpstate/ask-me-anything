@@ -20,3 +20,7 @@ class Question(BaseModel):
 
 class Answer(BaseModel):
     answer: str
+
+
+class Chat(BaseModel):
+    id: int

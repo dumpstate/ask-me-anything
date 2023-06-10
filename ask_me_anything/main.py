@@ -10,8 +10,14 @@ from sqlalchemy.orm import Session
 from ask_me_anything.config import Config
 from ask_me_anything.db import SessionLocal
 from ask_me_anything.models import TextChunk
-from ask_me_anything.repository import create_text_chunk, find_neighbours, get_text_chunks
-from ask_me_anything.schemas import Answer, Question, Status, TextChunk, URL
+from ask_me_anything.repository import (
+    create_chat,
+    create_text_chunk,
+    find_neighbours,
+    get_chat,
+    get_text_chunks,
+)
+from ask_me_anything.schemas import Answer, Chat, Question, Status, TextChunk, URL
 
 
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
@@ -93,6 +99,25 @@ def ask_a_question(question: Question, db: Session = Depends(get_db)):
     return Answer(answer=answer)
 
 
+@app.post("/api/v1/chat", response_model=Chat)
+def start_chat(db: Session = Depends(get_db)):
+    with db.begin():
+        chat = create_chat(db)
+
+    db.commit()
+
+    return Chat(id=chat.id)
+
+
 @app.get("/")
 def ask_anything(request: Request):
     return templates.TemplateResponse("ask_anything.html", {"request": request})
+
+
+@app.get("/chat/{chat_id}")
+def chat(request: Request, chat_id: int, db: Session = Depends(get_db)):
+    chat = get_chat(db, chat_id)
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "chat": chat,
+    })

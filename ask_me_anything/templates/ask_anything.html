@@ -1,105 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "base.html" %}
 
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+{% block head %}
+<title>Ask Me Anything</title>
+{% endblock %}
 
-        <title>Ask Me Anything</title>
-    </head>
-    <body>
-        <main class="container">
-            <section
-                x-data="{
-                    inProgress: false,
+{% block body %}
+<section
+    x-data="{
+        inProgress: false,
 
-                    async addContext() {
-                        this.inProgress = true
-                        const url = document.getElementById('context-url').value
-                        if (!url) return
-                        try {
-                            const response = await fetch('/api/v1/context', {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ url })
-                            })
-                            console.log(await response.json())
-                        } catch (err) {
-                            console.error(err)
-                        } finally {
-                            this.inProgress = false
-                        }
+        async addContext() {
+            this.inProgress = true
+            const url = document.getElementById('context-url').value
+            if (!url) return
+            try {
+                const response = await fetch('/api/v1/context', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                }">
-                <hgroup>
-                    <h2>Context</h2>
-                    <h3>Add URLs to give bot some context</h3>
-                </hgroup>
-                <form @submit.prevent="addContext">
-                    <label for="context-url">
-                        URL
-                        <input
-                            type="text"
-                            id="context-url"
-                            name="context-url" />
-                    </label>
-                    <button
-                        type="submit"
-                        x-bind:disabled="inProgress">Add</button>
-                </form>
-            </section>
+                    body: JSON.stringify({ url })
+                })
+                console.log(await response.json())
+            } catch (err) {
+                console.error(err)
+            } finally {
+                this.inProgress = false
+            }
+        },
+    }">
+    <hgroup>
+        <h2>Context</h2>
+        <h3>Add URLs to give bot some context</h3>
+    </hgroup>
+    <form @submit.prevent="addContext">
+        <label for="context-url">
+            URL
+            <input
+                type="text"
+                id="context-url"
+                name="context-url" />
+        </label>
+        <button
+            type="submit"
+            x-bind:disabled="inProgress">Add</button>
+    </form>
+</section>
 
-            <section
-                x-data="{
-                    inProgress: false,
-                    answer: '',
+<section
+    x-data="{
+        inProgress: false,
+        answer: '',
 
-                    async ask() {
-                        this.inProgress = true
-                        const question = document.getElementById('question').value
-                        if (!question) return
-                        try {
-                            const response = await fetch('/api/v1/question', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ question })
-                            })
-                            const body = await response.json()
-                            console.log(body)
-                            this.answer = body.answer
-                        } catch (err) {
-                            console.error(err)
-                        } finally {
-                            this.inProgress = false
-                        }
+        async ask() {
+            this.inProgress = true
+            const question = document.getElementById('question').value
+            if (!question) return
+            try {
+                const response = await fetch('/api/v1/question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
                     },
-                }">
-                <hgroup>
-                    <h2>Question</h2>
-                    <h3>Ask a question</h3>
-                </hgroup>
-                <form @submit.prevent="ask">
-                    <label for="question">
-                        Question
-                        <textarea
-                            id="question"
-                            name="question"></textarea>
-                    </label>
-                    <button
-                        type="submit"
-                        x-bind:disabled="inProgress">Ask</button>
-                    <div x-show="answer">
-                        <h3>Answer</h3>
-                        <p x-text="answer"></p>
-                    </div>
-                </form>
-            </section>
-        </main>
-    </body>
-</html>
+                    body: JSON.stringify({ question })
+                })
+                const body = await response.json()
+                console.log(body)
+                this.answer = body.answer
+            } catch (err) {
+                console.error(err)
+            } finally {
+                this.inProgress = false
+            }
+        },
+    }">
+    <hgroup>
+        <h2>Question</h2>
+        <h3>Ask a question</h3>
+    </hgroup>
+    <form @submit.prevent="ask">
+        <label for="question">
+            Question
+            <textarea
+                id="question"
+                name="question"></textarea>
+        </label>
+        <button
+            type="submit"
+            x-bind:disabled="inProgress">Ask</button>
+        <div x-show="answer">
+            <h3>Answer</h3>
+            <p x-text="answer"></p>
+        </div>
+    </form>
+</section>
+
+<section
+    x-data="{
+        inProgress: false,
+
+        async startChat() {
+            this.inProgress = true
+            try {
+                const response = await fetch('/api/v1/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                const body = await response.json()
+                console.log(body)
+                window.location.replace('/chat/' + body.id)
+            } catch (err) {
+                console.error(err)
+            } finally {
+                this.inProgress = false
+            }
+        },
+    }">
+    <h2>Chat</h2>
+    <button
+        class="secondary"
+        x-on:click="startChat"
+        x-bind:disabled="inProgress">Start Chat</button>
+</section>
+{% endblock %}
