@@ -22,6 +22,7 @@ def upgrade() -> None:
     op.create_table(
         "text_chunk",
         Column("id", Integer, primary_key=True, autoincrement=True),
+        Column("source_url", String),
         Column("text", String),
         Column("embedding", Vector(1536))
     )

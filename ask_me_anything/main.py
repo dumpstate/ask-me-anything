@@ -70,7 +70,7 @@ def add_url_to_context(url: URL, db: Session = Depends(get_db)):
     with db.begin():
         for document in documents:
             embedding = get_embedding(document.page_content)
-            create_text_chunk(db, document.page_content, embedding)
+            create_text_chunk(db, url.url, document.page_content, embedding)
 
     db.commit()
 
@@ -80,8 +80,8 @@ def add_url_to_context(url: URL, db: Session = Depends(get_db)):
 @app.post("/api/v1/question", response_model=Answer)
 def ask_a_question(question: Question, db: Session = Depends(get_db)):
     embedding = get_embedding(question.question)
-    ns = find_neighbours(db, embedding, 1)
-    context = "\n".join(n.text for n in ns)
+    ns = find_neighbours(db, embedding, 3)
+    context = "\n\n".join(n.text for n in ns)
 
     print(context)
 

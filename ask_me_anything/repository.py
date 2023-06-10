@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from ask_me_anything.models import TextChunk
 
 
-def create_text_chunk(db: Session, text: str, embedding: list[float]) -> TextChunk:
+def create_text_chunk(db: Session, source_url: str, text: str, embedding: list[float]) -> TextChunk:
     record = TextChunk(
+        source_url=source_url,
         text=text,
         embedding=embedding,
     )
