@@ -1,5 +1,7 @@
+from enum import Enum
+
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import Enum as EnumCol, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ask_me_anything.db import Base
@@ -20,9 +22,15 @@ class Chat(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
 
+class Author(Enum):
+    HUMAN = "human"
+    BOT = "bot"
+
+
 class Message(Base):
     __tablename__ = "message"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    chat_id: Mapped[int] = mapped_column(ForeignKey(Chat.id))
-    text: Mapped[str] = mapped_column(String)
+    author: Mapped[Author] = mapped_column(EnumCol(Author), nullable=False)
+    chat_id: Mapped[int] = mapped_column(ForeignKey(Chat.id), nullable=False)
+    text: Mapped[str] = mapped_column(String, nullable=False)

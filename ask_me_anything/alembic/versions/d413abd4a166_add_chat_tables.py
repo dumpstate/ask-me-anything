@@ -24,8 +24,9 @@ def upgrade() -> None:
     op.create_table(
         "message",
         sa.Column("id", sa.Integer, primary_key=True, autoincrement=True),
-        sa.Column("chat_id", sa.Integer, sa.ForeignKey("chat.id")),
-        sa.Column("text", sa.String),
+        sa.Column("author", sa.Enum("HUMAN", "BOT", name="author"), nullable=False),
+        sa.Column("chat_id", sa.Integer, sa.ForeignKey("chat.id"), nullable=False),
+        sa.Column("text", sa.String, nullable=False),
     )
 
 

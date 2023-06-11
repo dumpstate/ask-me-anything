@@ -2,8 +2,76 @@
 
 {% block head %}
 <title>Chat {{ chat.id }}</title>
+
+<style>
+    .user-message {
+        background-color: greenyellow;
+        border-radius: 10px;
+        padding: 5px;
+        text-align: right;
+        margin-bottom: 10px;
+        max-width: 50%;
+        align-self: flex-end;
+    }
+
+    .bot-message {
+        background-color: lightskyblue;
+        border-radius: 10px;
+        padding: 5px;
+        text-align: left;
+        margin-bottom: 10px;
+        max-width: 50%;
+    }
+
+    .bot-message p {
+        color: #000;
+    }
+
+    .user-message p {
+        color: #000;
+    }
+</style>
 {% endblock %}
 
 {% block body %}
 <h1>Chat {{ chat.id }}</h1>
+
+<section style="display: flex; flex-direction: column;">
+    <div style="display: flex; flex-direction: column; margin-bottom: 20px;">
+        <div class="bot-message">
+            <p>Hello! How are you today?</p>
+        </div>
+        <div class="user-message">
+            <p>I'm fine, thanks! How are you?</p>
+        </div>
+        <div class="bot-message">
+            <p>Good! How can I help you?</p>
+        </div>
+
+        {% for message in messages %}
+            {% if message.author == 'bot' %}
+                <div class="bot-message">
+                    <p>{{ message.text }}</p>
+                </div>
+            {% else %}
+                <div class="user-message">
+                    <p>{{ message.text }}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <form
+        action="/chat/{{ chat.id }}"
+        method="POST"
+        style="display: grid; column-gap: 10px;">
+        <input
+            type="text"
+            id="message"
+            name="message"
+            style="grid-column-start: 1; grid-column-end: 6;" />
+        <button
+            type="submit"
+            style="grid-column-start: 6; grid-column-end: 7;">Send</button>
+    </form>
+</section>
 {% endblock %}

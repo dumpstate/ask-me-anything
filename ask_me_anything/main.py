@@ -1,5 +1,7 @@
+from typing import Annotated
+
 import openai
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Form, Request
 from fastapi.templating import Jinja2Templates
 from langchain.chains import LLMChain
 from langchain.document_loaders import WebBaseLoader
@@ -9,12 +11,14 @@ from sqlalchemy.orm import Session
 
 from ask_me_anything.config import Config
 from ask_me_anything.db import SessionLocal
-from ask_me_anything.models import TextChunk
+from ask_me_anything.models import Author, TextChunk
 from ask_me_anything.repository import (
     create_chat,
+    create_message,
     create_text_chunk,
     find_neighbours,
     get_chat,
+    get_messages,
     get_text_chunks,
 )
 from ask_me_anything.schemas import Answer, Chat, Question, Status, TextChunk, URL
@@ -116,8 +120,27 @@ def ask_anything(request: Request):
 
 @app.get("/chat/{chat_id}")
 def chat(request: Request, chat_id: int, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "chat": get_chat(db, chat_id),
+        "messages": get_messages(db, chat_id),
+    })
+
+
+@app.post("/chat/{chat_id}")
+def submit_message(
+    request: Request,
+    chat_id: int,
+    message: Annotated[str, Form()],
+    db: Session = Depends(get_db),
+):
     chat = get_chat(db, chat_id)
+    create_message(db, chat_id, Author.HUMAN, message)
+
+    db.commit()
+
     return templates.TemplateResponse("chat.html", {
         "request": request,
         "chat": chat,
+        "messages": get_messages(db, chat_id),
     })
