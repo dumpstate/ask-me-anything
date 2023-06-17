@@ -38,18 +38,8 @@
 
 <section style="display: flex; flex-direction: column;">
     <div style="display: flex; flex-direction: column; margin-bottom: 20px;">
-        <div class="bot-message">
-            <p>Hello! How are you today?</p>
-        </div>
-        <div class="user-message">
-            <p>I'm fine, thanks! How are you?</p>
-        </div>
-        <div class="bot-message">
-            <p>Good! How can I help you?</p>
-        </div>
-
         {% for message in messages %}
-            {% if message.author == 'bot' %}
+            {% if message.author.value == 'bot' %}
                 <div class="bot-message">
                     <p>{{ message.text }}</p>
                 </div>
